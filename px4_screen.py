@@ -177,10 +177,11 @@ def screen_one(path):
         ts = d.data.get("timestamp")
         if ts is None or len(ts) < 2:
             continue
-        span = (ts[-1] - ts[0]) / 1e6
+        span = (float(ts[-1]) - float(ts[0])) / 1e6
+        if span <= 0:
+            continue
         counts[d.name] = counts.get(d.name, 0) + len(ts)
-        if span > 0:
-            rates[d.name] = max(rates.get(d.name, 0.0), (len(ts) - 1) / span)
+        rates[d.name] = max(rates.get(d.name, 0.0), (len(ts) - 1) / span)
 
     row["n_topics"] = len(present)
     for label, alts in REQUIRED.items():
