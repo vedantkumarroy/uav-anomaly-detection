@@ -36,7 +36,7 @@ def split_conformal(x_train, y_train, x_cal, y_cal, x_test, y_test, alpha):
 N = 2000
 x, y = make_data(N)
 idx = rng.permutation(N)
-n_train = 1000
+n_train = 200
 n_cal = 500
 x_train, y_train = x[idx[:n_train]], y[idx[:n_train]]
 x_cal, y_cal = x[idx[n_train:n_train+n_cal]], y[idx[n_train:n_train+n_cal]]
