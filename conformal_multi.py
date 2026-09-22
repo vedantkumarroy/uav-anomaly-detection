@@ -65,7 +65,7 @@ def replicate(n_runs, alpha, mask_fn, label):
 
 # --- main ---
 ALPHA = 0.05
-N_RUNS = 200
+N_RUNS = 1000
 
 print(f"Alpha = {ALPHA}, nominal coverage = {1-ALPHA}")
 print(f"Runs per subset = {N_RUNS}, total = {N_RUNS * 3}\n")
