@@ -16,7 +16,7 @@ def make_data(n):
 
 def fit_model(x, y):
     # simple polynomial fit
-    coeffs = np.polyfit(x, y, 5)
+    coeffs = np.polyfit(x, y, 15)
     return lambda x_new: np.polyval(coeffs, x_new)
 
 def split_conformal(x_train, y_train, x_cal, y_cal, x_test, y_test, alpha):
@@ -36,7 +36,7 @@ def split_conformal(x_train, y_train, x_cal, y_cal, x_test, y_test, alpha):
 N = 2000
 x, y = make_data(N)
 idx = rng.permutation(N)
-n_train = 200
+n_train = 30
 n_cal = 500
 x_train, y_train = x[idx[:n_train]], y[idx[:n_train]]
 x_cal, y_cal = x[idx[n_train:n_train+n_cal]], y[idx[n_train:n_train+n_cal]]
