@@ -81,5 +81,5 @@ for label, r in [("x>0", r_pos), ("x<0", r_neg), ("combined", r_all)]:
     print(f"{label:10s} mean={r.mean():.4f}  {ok}")
 
 overall = np.concatenate([r_pos, r_neg, r_all])
-print(f"\nOverall mean across all 600 runs: {overall.mean():.4f}")
+print(f"\nOverall mean across all {len(overall)} runs: {overall.mean():.4f}")
 print(f"In [0.90, 0.95]: {'YES' if 0.90 <= overall.mean() <= 0.95 else 'NO'}")
