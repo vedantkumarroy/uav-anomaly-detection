@@ -1,0 +1,58 @@
+sampled                 200
+downloaded              200
+parsed by pyulog        200
+  has position               197   (98%)
+  has attitude               199   (100%)
+  has status                 199   (100%)
+  has imu                    200   (100%)
+  has actuator               200   (100%)
+  has att_sp                 192   (96%)
+  has rates_sp               191   (96%)
+  has battery                189   (94%)
+  has ekf_ratios             197   (98%)
+  has ekf_innov              197   (98%)
+  has land_det               198   (99%)
+all required topics     179
+  + rate gates          176
+  + duration >= 60s     176
+  + airborne >= 45s     168
+SURVIVES ALL GATES      146   (73.0% of parsed)
+
+EKF test-ratio source (this drives firmware fragmentation):
+  estimator_innovation_test_ratios 167
+  estimator_status(legacy)         30
+  (none)                           3
+
+firmware versions among survivors:
+  17694720                         10
+  17761280                         10
+  17564416                         8
+  17825984                         7
+  17630207                         6
+  17826047                         6
+  17694975                         6
+  17891583                         5
+  17695488                         5
+  17826559                         4
+  17760256                         4
+  17629951                         4
+  17761535                         4
+  17891392                         4
+  17695743                         4
+
+SYS_AUTOSTART among survivors:
+  4001                             82
+  4011                             17
+  4019                             7
+  4050                             5
+  4065                             3
+  4052                             3
+  4010                             2
+  4015                             2
+  4510                             2
+  10040                            2
+  1111                             1
+  4990                             1
+  4500                             1
+  4101                             1
+  4014                             1

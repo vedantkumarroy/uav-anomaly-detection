@@ -64,9 +64,9 @@ REQUIRED = {
 # Minimum acceptable median publication rate, Hz, for the topics we will
 # actually build residuals from.
 MIN_RATE_HZ = {
-    "vehicle_local_position": 10.0,
-    "vehicle_attitude": 20.0,
-    "sensor_combined": 50.0,
+    "vehicle_local_position": 5.0,
+    "vehicle_attitude": 10.0,
+    # sensor_combined gate removed — not used by detector
 }
 
 MIN_DURATION_S = 60.0
