@@ -16,29 +16,30 @@ N_LOGS = 300
 MIN_DUR = 60.0
 MAX_DUR = 3600.0
 
+def decode_ver_sw(v):
+    """Unpack PX4 firmware version integer."""
+    if v is None or v == "":
+        return None
+    v = int(v)
+    return (v >> 24) & 0xFF, (v >> 16) & 0xFF, (v >> 8) & 0xFF, v & 0xFF
+
 def ver_band(ver_sw):
-    """Map ver_sw to a firmware band. ver_sw is a numeric string.
-    Real PX4 versions map approximately:
-       17000000-17399999  -> v1.12-1.13
-       17400000-17599999  -> v1.14-1.15
-       17600000-17759999  -> v1.16
-       17760000+          -> v1.17+
-    """
-    if not ver_sw:
+    """Map ver_sw to a firmware band based on decoded major.minor."""
+    decoded = decode_ver_sw(ver_sw)
+    if decoded is None:
         return None
-    try:
-        v = int(ver_sw)
-    except (TypeError, ValueError):
-        return None
-    if 17000000 <= v <= 17399999:
+    major, minor, patch, rtype = decoded
+    if major != 1:
+        return "other"
+    if minor <= 13:
         return "v1.12-1.13"
-    if 17400000 <= v <= 17599999:
+    if minor in (14, 15):
         return "v1.14-1.15"
-    if 17600000 <= v <= 17759999:
+    if minor == 16:
         return "v1.16"
-    if v >= 17760000:
+    if minor >= 17:
         return "v1.17+"
-    return None
+    return "other"
 
 def stream_download(log_id, session):
     url = BASE + DOWNLOAD_PATH.format(log_id=log_id)
