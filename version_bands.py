@@ -17,25 +17,19 @@ MIN_DUR = 60.0
 MAX_DUR = 3600.0
 
 
-def parse_ver_release(s):
-    """Parse 'v1.18.0 64' or 'v1.15.4' -> (major, minor, patch, rtype)."""
-    if not s:
+def decode_ver_sw(v):
+    """Unpack PX4 firmware version integer (bits: major/minor/patch/rtype)."""
+    if v is None or v == "":
         return None
-    s = str(s).strip().lstrip("v")
-    parts = s.replace(".", " ").split()
     try:
-        nums = [int(x) for x in parts]
-    except ValueError:
+        v = int(v)
+    except (TypeError, ValueError):
         return None
-    if len(nums) < 3:
-        return None
-    major, minor, patch = nums[0], nums[1], nums[2]
-    rtype = nums[3] if len(nums) > 3 else 0
-    return major, minor, patch, rtype
+    return (v >> 24) & 0xFF, (v >> 16) & 0xFF, (v >> 8) & 0xFF, v & 0xFF
 
 
 def ver_band(ver_sw):
-    decoded = parse_ver_release(ver_sw)
+    decoded = decode_ver_sw(ver_sw)
     if decoded is None:
         return None
     major, minor, patch, rtype = decoded
@@ -80,7 +74,7 @@ def analyze(path):
         return None
 
     info = u.msg_info_dict or {}
-    ver_sw = str(info.get("ver_sw_release") or info.get("ver_sw") or "")
+    ver_sw = info.get("ver_sw_release")
     band = ver_band(ver_sw)
 
     ratio_topic = None
