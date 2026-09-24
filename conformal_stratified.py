@@ -11,11 +11,11 @@ def make_data(n, rng):
     y = true_f(x) + rng.normal(0, noise_std(x))
     return x, y
 
-def fit_model(x, y, degree=15):
+def fit_model(x, y, degree=5):
     coeffs = np.polyfit(x, y, degree)
     return lambda x_new: np.polyval(coeffs, x_new)
 
-def one_run(rng, alpha, n_train=30, n_cal=500, n_test=1300):
+def one_run(rng, alpha, n_train=200, n_cal=500, n_test=1300):
     # generate ONE pool of data
     N = n_train + n_cal + n_test
     x, y = make_data(N, rng)
