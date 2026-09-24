@@ -20,8 +20,12 @@ def decode_ver_sw(v):
     """Unpack PX4 firmware version integer."""
     if v is None or v == "":
         return None
-    v = int(v)
+    try:
+        v = int(v)
+    except (TypeError, ValueError):
+        return None
     return (v >> 24) & 0xFF, (v >> 16) & 0xFF, (v >> 8) & 0xFF, v & 0xFF
+
 
 def ver_band(ver_sw):
     """Map ver_sw to a firmware band based on decoded major.minor."""
