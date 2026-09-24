@@ -16,20 +16,26 @@ N_LOGS = 300
 MIN_DUR = 60.0
 MAX_DUR = 3600.0
 
-def decode_ver_sw(v):
-    """Unpack PX4 firmware version integer."""
-    if v is None or v == "":
+
+def parse_ver_release(s):
+    """Parse 'v1.18.0 64' or 'v1.15.4' -> (major, minor, patch, rtype)."""
+    if not s:
         return None
+    s = str(s).strip().lstrip("v")
+    parts = s.replace(".", " ").split()
     try:
-        v = int(v)
-    except (TypeError, ValueError):
+        nums = [int(x) for x in parts]
+    except ValueError:
         return None
-    return (v >> 24) & 0xFF, (v >> 16) & 0xFF, (v >> 8) & 0xFF, v & 0xFF
+    if len(nums) < 3:
+        return None
+    major, minor, patch = nums[0], nums[1], nums[2]
+    rtype = nums[3] if len(nums) > 3 else 0
+    return major, minor, patch, rtype
 
 
 def ver_band(ver_sw):
-    """Map ver_sw to a firmware band based on decoded major.minor."""
-    decoded = decode_ver_sw(ver_sw)
+    decoded = parse_ver_release(ver_sw)
     if decoded is None:
         return None
     major, minor, patch, rtype = decoded
@@ -44,6 +50,7 @@ def ver_band(ver_sw):
     if minor >= 17:
         return "v1.17+"
     return "other"
+
 
 def stream_download(log_id, session):
     url = BASE + DOWNLOAD_PATH.format(log_id=log_id)
@@ -63,6 +70,7 @@ def stream_download(log_id, session):
         return tmp.name
     except Exception:
         return None
+
 
 def analyze(path):
     from pyulog import ULog
@@ -95,6 +103,7 @@ def analyze(path):
 
     return {"ver_sw": ver_sw, "band": band, "varying": sorted(varying)}
 
+
 def process(log_id, session):
     path = stream_download(log_id, session)
     if path is None:
@@ -110,6 +119,7 @@ def process(log_id, session):
         return None
     r["log_id"] = log_id
     return r
+
 
 def main():
     with open(DBINFO_CACHE) as f:
@@ -148,7 +158,6 @@ def main():
             if i % 25 == 0:
                 print(f"  processed {i}/{len(sample)}")
 
-    # group by band
     print(f"\nparsed: {len(rows)} logs\n")
     band_varying = defaultdict(set)
     band_counts = defaultdict(int)
@@ -159,13 +168,13 @@ def main():
         band_varying[r["band"]].update(r["varying"])
 
     print("=== Bands ===")
-    for band in ["v1.12-1.13", "v1.14-1.15", "v1.16", "v1.17+"]:
+    for band in ["v1.12-1.13", "v1.14-1.15", "v1.16", "v1.17+", "other"]:
         n = band_counts.get(band, 0)
         nv = len(band_varying.get(band, set()))
-        print(f"{band:12s}  logs={n:4d}  unique varying ratios={nv}")
+        if n > 0:
+            print(f"{band:12s}  logs={n:4d}  unique varying ratios={nv}")
 
-    # matrix
-    all_fields = sorted(set().union(*band_varying.values()))
+    all_fields = sorted(set().union(*band_varying.values())) if band_varying else []
     bands = ["v1.12-1.13", "v1.14-1.15", "v1.16", "v1.17+"]
 
     print("\n=== Vary matrix ===")
@@ -177,13 +186,13 @@ def main():
             line += ("X" if f in band_varying[b] else ".").rjust(14)
         print(line)
 
-    # save
     import pandas as pd
     df = pd.DataFrame([{"log_id": r["log_id"], "ver_sw": r["ver_sw"],
                         "band": r["band"], "n_varying": len(r["varying"])}
                        for r in rows])
     df.to_csv("version_bands_table.csv", index=False)
     print("\nsaved: version_bands_table.csv")
+
 
 if __name__ == "__main__":
     main()
