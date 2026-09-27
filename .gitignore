@@ -2,9 +2,8 @@ __pycache__/
 *.pyc
 venv/
 .venv/
+pilot/
 pilot2/
 *.ulg
 *.parquet
-.DS_Storet a s k 2 _ s t e p 3 _ s c h e m a _ d i f f . t x t 
- 
- 
+.DS_Store
