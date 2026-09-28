@@ -1,3 +1,9 @@
+# Bit layout verified against PX4 source:
+#   https://github.com/PX4/PX4-Autopilot/blob/main/src/lib/version/version.h
+#   The header states: "version in the form 0xAABBCCTT
+#   (AA: Major, BB: Minor, CC: Patch, TT Type)"
+#   This maps to the bit shifts used below.
+
 def decode_ver_sw(v):
     """
     Unpack PX4 firmware version from 32-bit integer.
