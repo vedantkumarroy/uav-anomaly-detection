@@ -13,7 +13,8 @@ BASE = "https://logs.px4.io"
 DOWNLOAD_PATH = "/download?log={log_id}"
 DBINFO_CACHE = "pilot/dbinfo.json"
 
-N_LOGS = 500
+N_LOGS = 2000
+SEED = 4
 
 MIN_DUR = 60.0
 MAX_DUR = 3600.0
@@ -86,7 +87,6 @@ def analyze(path):
     if band is None:
         return None
 
-    # find topics
     present = set()
     rates = {}
     ratio_topic = None
@@ -106,7 +106,6 @@ def analyze(path):
     if ratio_topic is None:
         return None
 
-    # rate gates
     rate_pos = rates.get("vehicle_local_position", 0.0)
     rate_att = rates.get("vehicle_attitude", 0.0)
     rate_rat = rates.get("estimator_innovation_test_ratios", 0.0)
@@ -117,7 +116,6 @@ def analyze(path):
     if rate_rat < MIN_RATE_RATIOS:
         return None
 
-    # duration
     try:
         dur = (u.last_timestamp - u.start_timestamp) / 1e6
     except Exception:
@@ -125,13 +123,11 @@ def analyze(path):
     if dur < MIN_DUR:
         return None
 
-    # dropout
     drop_ms = sum(getattr(d, "duration", 0) for d in (u.dropouts or []))
     dropout_frac = (drop_ms / 1000.0) / dur if dur > 0 else 1.0
     if dropout_frac > MAX_DROPOUT_FRAC:
         return None
 
-    # airborne
     airborne = 0.0
     ld = next((d for d in u.data_list if d.name == "vehicle_land_detected"), None)
     if ld is not None and "landed" in ld.data and len(ld.data["timestamp"]) > 1:
@@ -148,13 +144,11 @@ def analyze(path):
     if airborne < MIN_AIRBORNE_S:
         return None
 
-    # SYS_AUTOSTART
     params = u.initial_parameters or {}
     autostart = str(params.get("SYS_AUTOSTART", ""))
     if autostart not in VALID_AUTOSTART:
         return None
 
-    # field presence and variation
     field_info = {}
     for field, arr in ratio_topic.data.items():
         if field in ("timestamp", "timestamp_sample"):
@@ -211,9 +205,9 @@ def main():
         cand.append(r)
 
     print(f"candidates: {len(cand)}")
-    random.seed(3)
+    random.seed(SEED)
     sample = random.sample(cand, min(N_LOGS, len(cand)))
-    print(f"streaming {len(sample)} logs\n")
+    print(f"seed = {SEED}, streaming {len(sample)} logs\n")
 
     session = requests.Session()
     session.headers["User-Agent"] = "px4-matrix/1.0"
@@ -231,18 +225,20 @@ def main():
 
     print(f"\npassed all gates: {len(rows)} logs\n")
 
-    # aggregate per band
     bands = ["v1.12-1.13", "v1.14-1.15", "v1.16+"]
     band_counts = {b: 0 for b in bands}
     band_present = defaultdict(lambda: defaultdict(int))
     band_varying = defaultdict(lambda: defaultdict(int))
 
     all_fields = set()
+    has_baro_fluct = []
     for r in rows:
         b = r["band"]
         if b not in bands:
             continue
         band_counts[b] += 1
+        if "is_baro_fluctuation" in r["field_info"]:
+            has_baro_fluct.append(r["log_id"])
         for field, info in r["field_info"].items():
             all_fields.add(field)
             if info["present"]:
@@ -255,10 +251,11 @@ def main():
     print("=== Band counts (post-gate) ===")
     for b in bands:
         print(f"  {b}: {band_counts[b]}")
+    print(f"  TOTAL: {sum(band_counts.values())}")
 
     print("\n=== Field matrix ===")
     print(f"{'field':<26}" + "".join(f"{b:>16}" for b in bands))
-    print(f"{'':<26}" + "".join(f"{'present / vary':>16}" for b in bands))
+    print(f"{'':<26}" + "".join(f"{'present/vary':>16}" for b in bands))
     for field in all_fields:
         line = field.ljust(26)
         for b in bands:
@@ -270,7 +267,12 @@ def main():
             line += f"{p_frac:.2f}/{v_frac:.2f}".rjust(16)
         print(line)
 
-    # save per-log CSV
+    print(f"\n=== is_baro_fluctuation ===")
+    print(f"logs with this field: {len(has_baro_fluct)}")
+    if has_baro_fluct:
+        for lid in has_baro_fluct[:20]:
+            print(f"  {lid}")
+
     per_log = []
     for r in rows:
         row = {
@@ -285,8 +287,8 @@ def main():
             row[f"varying_{field}"] = int(info["varying"])
         per_log.append(row)
 
-    pd.DataFrame(per_log).to_csv("band_matrix_v2.csv", index=False)
-    print("\nsaved: band_matrix_v2.csv")
+    pd.DataFrame(per_log).to_csv("band_matrix_v2_2000.csv", index=False)
+    print("\nsaved: band_matrix_v2_2000.csv")
 
 
 if __name__ == "__main__":
