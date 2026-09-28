@@ -14,7 +14,7 @@ DOWNLOAD_PATH = "/download?log={log_id}"
 DBINFO_CACHE = "pilot/dbinfo.json"
 
 N_LOGS = 2000
-SEED = 4
+SEED = 2
 
 MIN_DUR = 60.0
 MAX_DUR = 3600.0
@@ -270,7 +270,7 @@ def main():
     print(f"\n=== is_baro_fluctuation ===")
     print(f"logs with this field: {len(has_baro_fluct)}")
     if has_baro_fluct:
-        for lid in has_baro_fluct[:20]:
+        for lid in has_baro_fluct[:50]:
             print(f"  {lid}")
 
     per_log = []
@@ -287,8 +287,8 @@ def main():
             row[f"varying_{field}"] = int(info["varying"])
         per_log.append(row)
 
-    pd.DataFrame(per_log).to_csv("band_matrix_v2_2000.csv", index=False)
-    print("\nsaved: band_matrix_v2_2000.csv")
+    pd.DataFrame(per_log).to_csv("band_matrix_v2_2000_seed2.csv", index=False)
+    print("\nsaved: band_matrix_v2_2000_seed2.csv")
 
 
 if __name__ == "__main__":
