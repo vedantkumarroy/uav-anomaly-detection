@@ -12,7 +12,7 @@ BASE = "https://logs.px4.io"
 DOWNLOAD_PATH = "/download?log={log_id}"
 DBINFO_CACHE = "pilot/dbinfo.json"
 
-N_LOGS = 300
+N_LOGS = 1000
 MIN_DUR = 60.0
 MAX_DUR = 3600.0
 
