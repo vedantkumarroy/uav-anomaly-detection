@@ -12,7 +12,7 @@ BASE = "https://logs.px4.io"
 DOWNLOAD_PATH = "/download?log={log_id}"
 DBINFO_CACHE = "pilot/dbinfo.json"
 
-N_LOGS = 1000
+N_LOGS = 2000
 MIN_DUR = 60.0
 MAX_DUR = 3600.0
 
@@ -134,7 +134,7 @@ def main():
         cand.append(r)
 
     print(f"candidates: {len(cand)}")
-    random.seed(1)
+    random.seed(2)
     sample = random.sample(cand, min(N_LOGS, len(cand)))
     print(f"streaming {len(sample)} logs\n")
 
