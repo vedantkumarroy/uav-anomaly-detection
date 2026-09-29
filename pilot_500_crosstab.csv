@@ -1,0 +1,13 @@
+status,v1.12-1.13,v1.14-1.15,v1.16+
+filtered_failsafe_true,23,61,17
+filtered_filter_fault_flags,5,17,4
+filtered_land_det_missing,0,2,0
+filtered_nav_state_forbidden,16,24,9
+filtered_never_landed,3,9,7
+gate_airborne,10,14,4
+gate_dropout,4,5,7
+gate_no_ratios_topic,5,1,1
+gate_rate_attitude,1,0,0
+gate_rate_position,0,2,0
+gate_rate_ratios,0,3,0
+kept,52,112,67
