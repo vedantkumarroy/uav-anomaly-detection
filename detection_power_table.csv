@@ -1,0 +1,17 @@
+method,indicator_threshold,n_candidates,n_detected,detection_rate
+TrackA,1,276,17,0.06159420289855073
+IsoForest,1,276,22,0.07971014492753623
+OneClassSVM,1,276,8,0.028985507246376812
+Autoencoder,1,276,26,0.09420289855072464
+TrackA,2,101,11,0.10891089108910891
+IsoForest,2,101,13,0.12871287128712872
+OneClassSVM,2,101,6,0.0594059405940594
+Autoencoder,2,101,14,0.13861386138613863
+TrackA,3,25,2,0.08
+IsoForest,3,25,5,0.2
+OneClassSVM,3,25,1,0.04
+Autoencoder,3,25,5,0.2
+TrackA,4,8,0,0.0
+IsoForest,4,8,1,0.125
+OneClassSVM,4,8,0,0.0
+Autoencoder,4,8,1,0.125
