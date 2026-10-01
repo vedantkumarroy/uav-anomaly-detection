@@ -1,0 +1,4 @@
+method,coverage
+IsolationForest,0.051036682615629984
+OneClassSVM,0.03668261562998405
+Autoencoder,0.05263157894736842
