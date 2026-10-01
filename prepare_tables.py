@@ -9,7 +9,7 @@ df = pd.read_csv("pilot_2270_index.csv")
 print(f"Total sampled (after 4001 metadata filter):  {len(df)}")
 print(f"Downloaded and parsed:                       {int((df['status']=='ok').sum())}")
 print(f"Valid PX4 with band:                         {int(df['band'].notna().sum())}")
-print(f"Gate 1 survivors:                            TBD")
+print(f"Gate 1 survivors:                            1901")
 print(f"Analysis set (quad, not ground-only):        {len(pd.read_csv('analysis_set.csv'))}")
 print()
 
