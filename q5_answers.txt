@@ -1,0 +1,153 @@
+================================================================
+ANSWERS TO REMAINING CORRECTIONS (Q5a, Q5b, Q5d)
+================================================================
+
+Q5a: Why was the first dropout measure tautological?
+
+The first dropout proxy was:
+
+    dropout_frac = (expected_count - actual_count) / expected_count
+
+where:
+
+    expected_count = rate_hz * span_seconds
+    rate_hz = (actual_count - 1) / span_seconds
+
+Substituting:
+
+    expected_count = ((actual_count - 1) / span_seconds) * span_seconds
+                   = actual_count - 1
+
+So:
+
+    (expected_count - actual_count) = (actual_count - 1) - actual_count
+                                    = -1
+
+    dropout_frac = -1 / (actual_count - 1)   (always negative, tiny)
+
+or with the +1 rounding, always zero. The fraction carried no
+information about real dropouts. It was circular: rate was derived
+from sample count, then compared back to sample count.
+
+The v2 proxy replaces this by looking at the timestamp series
+directly. A dropout is a gap in the timestamps. Specifically:
+
+    gap_threshold = 10 * median(diff(timestamps))
+    dropout_time  = sum of gaps larger than threshold
+    dropout_frac  = dropout_time / total_span
+
+This is a physical measure of missing recording time, independent
+of the sample count. It is the measure used in the datasheet.
+
+================================================================
+
+Q5b: Which dropout measure goes in the datasheet?
+
+The datasheet uses the v2 measure:
+
+    dropout_frac = fraction of total recording time spent in
+                   timestamp gaps larger than 10 times the median
+                   inter-sample interval
+
+Computed per log, taking the maximum across four topics:
+    vehicle_attitude
+    vehicle_local_position
+    sensor_combined
+    estimator_innovation_test_ratios
+
+Rationale for the choice:
+
+  1. The .ulg file is discarded after streaming. pyulog's native
+     dropout record (ulog.dropouts) cannot be recovered from the
+     Parquet output. We chose the v2 measure because it works on
+     the data we retain.
+
+  2. The four topics span the range of publishing rates in the
+     corpus. Attitude and IMU at 20-250 Hz, position at 5-125 Hz,
+     ratios at 1.5-125 Hz. The gap threshold adapts automatically
+     to each topic's rate.
+
+  3. The measure is conservative. A 10x median gap on a 20 Hz
+     topic is 0.5 seconds. On a 2 Hz topic it is 5 seconds. These
+     are long, unambiguous recording breaks rather than noise.
+
+Limitations of the measure:
+
+  - Does not capture slow jitter or intermittent drops that are
+    smaller than 10x the median gap.
+  - For topics with irregular publish rates (e.g., sensor_combined
+    during low-rate flights) the median may be dominated by a
+    different sub-mode.
+  - Values are absolute fractions. A 0.02 threshold means 2% of
+    total recording time was lost.
+
+What the datasheet should state:
+
+    "dropout_frac is the fraction of total recording time spent
+    in timestamp gaps larger than 10x the median inter-sample
+    interval, computed as the maximum across vehicle_attitude,
+    vehicle_local_position, sensor_combined and
+    estimator_innovation_test_ratios. It is a proxy for the
+    pyulog dropout record, which cannot be recovered from the
+    Parquet output."
+
+================================================================
+
+Q5d: Why did Track A move after the log transform?
+
+Sir's observation: log(1+x) is a monotone transform. It cannot
+change a score that uses a quantile. So why did Track A move?
+
+Sir is correct at the per-ratio level. For a single ratio:
+
+    p95(log(1+x)) = log(1 + p95(x))
+
+The ordering is preserved. Coverage at the same quantile is
+identical.
+
+But the Track A composite score is not a per-ratio quantile. In
+coverage_power_curve.py, Track A is computed as:
+
+    Xn = (X - median_A) / IQR_A      # per-ratio normalization
+    score_A = max(Xn, axis=1)        # max across 10 ratios
+
+where median_A and IQR_A are computed on Group A.
+
+Three effects cause the movement:
+
+  1. The median and IQR change when the underlying values are
+     log-transformed. For example, gps_hpos[0] has a heavy tail.
+     Its IQR is dominated by the tail. After log transform, the
+     tail is compressed and the IQR shrinks. Different ratios
+     end up with different normalization factors.
+
+  2. The max across ratios picks different winning ratios when
+     the per-ratio normalizations shift. On a given flight, the
+     ratio with the largest normalized value may be ratio A
+     before the transform and ratio B after.
+
+  3. The analysis set also changed between the two runs. The
+     first Track A (0.0957 detection) ran on the 1,566-log set
+     with the leaky clip. The second Track A (0.0426) ran on
+     the 1,627-log set with the corrected clip.
+
+So the movement is not caused by the log transform alone. It is
+the interaction of the log transform with the IQR normalization
+and the max-across-ratios step, plus the change in the analysis
+set.
+
+What this means:
+
+  - Track A's per-ratio quantile coverage is log-invariant. The
+    per-ratio coverage results (Section TABLE 4) are unaffected
+    by the log transform.
+  - Track A's composite detection power depends on the IQR
+    normalization, which is not log-invariant. The detection
+    power number for Track A should be reported with this
+    caveat.
+
+For the paper: report per-ratio coverage as the primary Track A
+result. Report the composite detection power as secondary, with
+the note that it depends on the normalization choice.
+
+================================================================
