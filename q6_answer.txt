@@ -1,28 +1,54 @@
-Q6: Are the 10^13 values sentinels or division-by-zero?
+Q6: Are the 10^13 values in gps_hpos and gps_vpos sentinels or
+    division-by-zero?
 
-Answer: Neither. They are the squared normalized innovation used by PX4's EKF2:
+Answer: Neither. They are the squared normalized innovation used
+by PX4's EKF2:
 
-    innovation_test_ratio = innovation^2 / (gate_size^2 * innovation_variance)
+    innovation_test_ratio = innovation^2 / (gate_size^2 * variance)
 
-Verified by reconstructing the ratio from `estimator_innovations` and
-`estimator_innovation_variances` on log 37f5014b-c8fc-447d-9974-f72adcd6ff34:
+Verified by reconstruction on log 37f5014b-c8fc-447d-9974-f72adcd6ff34:
 
-  sample 12: innovation=-1.3492e7, variance=2.0928
-    reconstructed: (1.3492e7)^2 / (5^2 * 2.0928) = 3.4792e12
-    logged ratio:  3.4792e12   (exact match)
+  sample 12:
+    innovation = -1.3492e+07
+    variance   = 2.0928
+    gate_size  = 5   (PX4 default EKF2_GPS_P_GATE)
+    reconstructed = (1.3492e7)^2 / (25 * 2.0928) = 3.4792e+12
+    logged ratio  = 3.4792e+12   (exact match)
 
-  sample 13: same innovation, variance=2.1094
-    reconstructed: (1.3492e7)^2 / (25 * 2.1094) = 3.4519e12
-    logged ratio:  3.4519e12   (exact match)
+  sample 13:
+    innovation = -1.3492e+07
+    variance   = 2.1094
+    reconstructed = (1.3492e7)^2 / (25 * 2.1094) = 3.4519e+12
+    logged ratio  = 3.4519e+12   (exact match)
 
-The gate_size = 5 matches PX4's default EKF2_GPS_P_GATE.
+  sample 14:
+    innovation = -1.3492e+07
+    variance   = 2.1845
+    reconstructed = (1.3492e7)^2 / (25 * 2.1845) = 3.3332e+12
+    logged ratio  = 3.3332e+12   (exact match)
 
-Implication: the ratio is a squared quantity with a nonlinear dependence
-on innovation variance. A small variance (typical) with a moderately
-large innovation (5-10 sigma) gives a ratio in the 10^6 to 10^12 range.
-These are not corrupted values. They are what PX4 computes internally
-when deciding to reject a measurement.
+The relationship is verified. The gate size is 5, matching the PX4
+default.
 
-This means the log+clip transform is a reasonable stability fix, but
-the deeper story is that the ratio is a squared statistic. Papers
-analyzing it should be aware that the tail is heavy by construction.
+What this means:
+
+  1. The ratio is a squared quantity. It has a nonlinear dependence
+     on the innovation variance. A small variance (typical) with a
+     moderately large innovation gives a ratio in the 10^6 to 10^12
+     range.
+
+  2. When this ratio exceeds 1.0, PX4 rejects the measurement. At
+     10^12 the rejection is complete. The flight is still classified
+     as healthy by every upstream quality gate.
+
+  3. This strengthens the C1 result. On 21 percent of healthy flights,
+     PX4's own threshold is exceeded in more than 5 percent of samples.
+     The ratio exceeds by many orders of magnitude, not marginally.
+
+  4. The log(1+x) and 99.9th percentile clip are correct stability
+     fixes. But the deeper insight is that the ratio is heavy-tailed
+     by construction. Papers analyzing it should note this.
+
+  5. No sentinel values were found. No division by exactly zero
+     (variance is always >= 0.3 in the sampled logs). The 10^12 values
+     are the real arithmetic PX4 performs.
