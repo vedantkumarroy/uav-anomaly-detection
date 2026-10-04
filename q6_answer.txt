@@ -1,0 +1,28 @@
+Q6: Are the 10^13 values sentinels or division-by-zero?
+
+Answer: Neither. They are the squared normalized innovation used by PX4's EKF2:
+
+    innovation_test_ratio = innovation^2 / (gate_size^2 * innovation_variance)
+
+Verified by reconstructing the ratio from `estimator_innovations` and
+`estimator_innovation_variances` on log 37f5014b-c8fc-447d-9974-f72adcd6ff34:
+
+  sample 12: innovation=-1.3492e7, variance=2.0928
+    reconstructed: (1.3492e7)^2 / (5^2 * 2.0928) = 3.4792e12
+    logged ratio:  3.4792e12   (exact match)
+
+  sample 13: same innovation, variance=2.1094
+    reconstructed: (1.3492e7)^2 / (25 * 2.1094) = 3.4519e12
+    logged ratio:  3.4519e12   (exact match)
+
+The gate_size = 5 matches PX4's default EKF2_GPS_P_GATE.
+
+Implication: the ratio is a squared quantity with a nonlinear dependence
+on innovation variance. A small variance (typical) with a moderately
+large innovation (5-10 sigma) gives a ratio in the 10^6 to 10^12 range.
+These are not corrupted values. They are what PX4 computes internally
+when deciding to reject a measurement.
+
+This means the log+clip transform is a reasonable stability fix, but
+the deeper story is that the ratio is a squared statistic. Papers
+analyzing it should be aware that the tail is heavy by construction.
