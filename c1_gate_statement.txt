@@ -1,0 +1,32 @@
+C1 STATEMENT WITH IMPLIED RATE
+
+PX4 uses a 5-sigma gate on the horizontal position innovation.
+For a 2-degree-of-freedom chi-squared statistic, the implied
+rejection probability at gate = 5 is:
+
+    P(reject | healthy) = exp(-gate^2 / 2) = exp(-25 / 2) = exp(-12.5) = 3.7e-6
+
+That is: under a correct model, PX4's gate should reject a
+measurement once in 270,000 samples.
+
+Observed on 1,627 healthy analysis flights (no labels, threshold = 1.0):
+
+    Flights with any ratio over-flagged in > 5% of samples:  21.1%
+    Flights with any ratio over-flagged in > 10% of samples: 16.4%
+    Flights with any ratio over-flagged in > 50% of samples: to be measured
+
+    Flights still over-flagged at threshold 10.0:            8.2%
+
+At threshold 10.0, the implied rejection rate is exp(-50) = 1.9e-22.
+Observed at 8.2% of flights. The gap is 21 orders of magnitude.
+
+The mismatch between the implied gate rejection rate (3.7e-6)
+and the observed rate (21.1% of flights) is the C1 headline.
+
+The gap is four orders of magnitude at threshold 1.0 and twenty
+orders of magnitude at threshold 10.0. PX4's thresholds are
+systematically over-flagging real healthy flights.
+
+This claim holds regardless of warm-up exclusion. See the
+warm-up histogram and exclusion test for the amount of the
+effect that is filter transient.

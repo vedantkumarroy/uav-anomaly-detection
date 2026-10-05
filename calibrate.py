@@ -5,7 +5,7 @@ import pandas as pd
 import pyarrow.parquet as pq
 
 LOGDIR = "pilot_2270/logs"
-ANALYSIS_CSV = "analysis_set.csv"
+ANALYSIS_CSV = "combined_analysis_set.csv"
 RATIO_TOPIC = "estimator_innovation_test_ratios"
 
 RATIOS = [
