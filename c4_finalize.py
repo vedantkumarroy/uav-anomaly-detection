@@ -1,14 +1,6 @@
-"""
-Finalize C4 hand-labels.
-
-Apply labels to the worksheet, compute agreement with detector flags,
-produce a summary table.
-"""
-
 import pandas as pd
 import numpy as np
 
-# Hand labels from manual examination of motor means
 hand_labels = {
     "696590b3-101b-4aa4-820d-d67b22eecea3": "genuine",
     "c1506e1f-9ee3-4640-b073-1483605b9e32": "genuine",
@@ -64,6 +56,10 @@ hand_labels = {
 
 df = pd.read_csv("c4_handlabel_worksheet.csv")
 df["hand_label"] = df["log_id"].map(hand_labels)
+
+# add flag_any BEFORE slicing
+df["flag_any"] = df[["flag_iso", "flag_svm", "flag_ae"]].any(axis=1)
+
 df.to_csv("c4_handlabel_final.csv", index=False)
 
 print(f"labelled {df['hand_label'].notna().sum()} of {len(df)} flights")
@@ -72,24 +68,22 @@ print("=== Hand-label distribution ===")
 print(df["hand_label"].value_counts().to_string())
 print()
 
-# agreement analysis
+# now slice
+genuine = df[df["hand_label"] == "genuine"]
+not_genuine = df[df["hand_label"] == "not_genuine"]
+borderline = df[df["hand_label"] == "borderline"]
+
 print("=" * 70)
 print("Detector agreement with hand labels")
 print("=" * 70)
 print()
 
-# For each detector, consider "detector flagged" as positive prediction.
-# Consider "genuine" as positive truth.
-genuine = df[df["hand_label"] == "genuine"]
-not_genuine = df[df["hand_label"] == "not_genuine"]
-borderline = df[df["hand_label"] == "borderline"]
-
-for method in ["flag_iso", "flag_svm", "flag_ae"]:
+for method in ["flag_iso", "flag_svm", "flag_ae", "flag_any"]:
     print(f"--- {method} ---")
     n_gen = len(genuine)
     n_ng = len(not_genuine)
-    tp = int(genuine[method].sum())  # flagged as anomaly, correctly
-    fp = int(not_genuine[method].sum())  # flagged, but actually normal
+    tp = int(genuine[method].sum())
+    fp = int(not_genuine[method].sum())
     tn = n_ng - fp
     fn = n_gen - tp
     print(f"  true positive:   {tp}/{n_gen}  (genuine flights flagged)")
@@ -102,29 +96,21 @@ for method in ["flag_iso", "flag_svm", "flag_ae"]:
     print(f"  recall:    {recall:.3f}")
     print()
 
-# Any detector combined
-df["flag_any"] = df[["flag_iso", "flag_svm", "flag_ae"]].any(axis=1)
-print("--- Any detector ---")
-tp = int(genuine["flag_any"].sum())
-fp = int(not_genuine["flag_any"].sum())
-tn = len(not_genuine) - fp
-fn = len(genuine) - tp
-print(f"  true positive:   {tp}/{len(genuine)}")
-print(f"  false positive:  {fp}/{len(not_genuine)}")
-print(f"  precision: {tp/(tp+fp) if (tp+fp)>0 else float('nan'):.3f}")
-print(f"  recall:    {tp/(tp+fn) if (tp+fn)>0 else float('nan'):.3f}")
-print()
-
-# Borderline treatment
-print("--- Borderline flights (flagged) ---")
+print("--- Borderline flights ---")
 print(f"  n_borderline: {len(borderline)}")
 print(f"  flagged by any detector: {int(borderline['flag_any'].sum())} ({100*borderline['flag_any'].mean():.1f}%)")
 print()
 
-# Sanity check: which genuine flights were missed?
 print("=== Genuine flights missed by all detectors ===")
 missed = genuine[~genuine["flag_any"]]
 for _, row in missed.iterrows():
+    print(f"  {row['log_id'][:20]:>20s}  sat_frac={row['sat_frac']:.3f}  "
+          f"sat_max_run_s={row['sat_max_run_s']:.1f}  spread={row['spread_p95']:.3f}")
+
+print()
+print("=== Genuine flights detected by any detector ===")
+caught = genuine[genuine["flag_any"]]
+for _, row in caught.iterrows():
     print(f"  {row['log_id'][:20]:>20s}  sat_frac={row['sat_frac']:.3f}  "
           f"sat_max_run_s={row['sat_max_run_s']:.1f}  spread={row['spread_p95']:.3f}")
 
