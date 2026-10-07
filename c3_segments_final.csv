@@ -1,0 +1,4 @@
+method,point,ci_low,ci_high
+cross_band,0.9145,0.879,0.9432
+weighted_conformal,0.9196944521515411,0.8851270076606365,0.9482507989151325
+in_band_reference,0.9324,0.8935,0.9578
