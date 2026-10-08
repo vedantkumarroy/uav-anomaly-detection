@@ -294,3 +294,59 @@ Approximately 111 flights (6.8% of corpus) carry values above 10^10 in
 ~157 seconds of sustained behavior. Not brief spikes.
 
 The values are the squared normalized innovation:
+
+
+## Additional analyses
+
+### Matched-coverage curve
+
+Sweep alpha from 0.01 to 0.30. Detection power vs false alarm rate for all
+four detectors on the top-10% sat_frac flights.
+
+| Detector | FA rate (alpha=0.05) | Power (k/65) |
+|---|---|---|
+| Isolation Forest | 4.91% | 5/65 (7.7%) |
+| One-Class SVM | 5.06% | 3/65 (4.6%) |
+| Autoencoder | 5.37% | 6/65 (9.2%) |
+| PX4 threshold | 4.60% | 0/65 (0.0%) |
+
+The PX4 curve sits below every other detector across the full false alarm
+rate range from 0.5% to 25%. It is not a single-threshold artifact.
+
+Figure: `matched_coverage_curve.png`.
+
+### Alpha sensitivity of C2 and C3
+
+Reran C2 and C3 at alpha = 0.01, 0.05, 0.10, 0.20.
+
+C2 regime coverage:
+
+| alpha | hover | translation | descent |
+|---|---|---|---|
+| 0.01 | 0.9905 | 0.9842 | 0.9892 |
+| 0.05 | 0.9609 | 0.9401 | 0.9536 |
+| 0.10 | 0.9077 | 0.8921 | 0.9053 |
+| 0.20 | 0.8037 | 0.7987 | 0.8175 |
+
+C3 cross-band and weighted:
+
+| alpha | cross | weighted | gap from nominal (cross) |
+|---|---|---|---|
+| 0.01 | 0.9831 | 0.9815 | -0.007 |
+| 0.05 | 0.9228 | 0.9270 | -0.027 |
+| 0.10 | 0.8614 | 0.8714 | -0.039 |
+| 0.20 | 0.7238 | 0.7508 | -0.076 |
+
+The C2 regime gap and the C3 cross-band failure hold across all alphas.
+Not artifacts of the 95% choice.
+
+Figure: `alpha_sensitivity.png`.
+
+### Reproducibility
+
+`run_all.py` runs every analysis script in the correct order. One command
+reproduces the complete paper. Runtime: approximately 90 minutes on a
+standard laptop.
+
+`matched_coverage_curve.py`, `alpha_sensitivity.py`, `run_all.py` are the
+new scripts.
