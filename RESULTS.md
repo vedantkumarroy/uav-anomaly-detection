@@ -9,13 +9,14 @@ ratios to decide whether sensor measurements are trustworthy. This project
 measures the false alarm rate of those thresholds on real flights, and
 evaluates conformal prediction as a calibrated alternative.
 
-Four claims:
+## Four claims
 
-- **C1**: PX4 EKF thresholds over-flag healthy flights
-- **C2**: Coverage guarantees are marginal, not conditional
-- **C3**: Cross-band calibration fails; weighted conformal repairs partially
-- **C4**: Conformal calibration does not destroy detection power; but
-  ratio-based detection is blind to motor imbalance
+| Claim | Classification | Result |
+|---|---|---|
+| C1 | Strong quantitative claim | 18.9% of healthy flights over-flag. 53 orders of magnitude gap between implied and observed. Firmware degradation monotonic. |
+| C2 | Null result | Regime coverage differences not significant under cluster-robust CIs |
+| C3 | Null result | Point estimates under-cover cross-band, but cluster-robust intervals include nominal |
+| C4 | Scope result | EKF ratios cannot see actuator faults. Not a detection-power measurement. |
 
 ## Dataset
 
@@ -214,7 +215,25 @@ Segment-level weighted conformal with cluster bootstrap in
 
 ---
 
-## C4: Detection power and hand-labels
+## C4: Ratio-based detection is blind to motor imbalance
+
+This is a scope result, not a detection-power measurement. The ratio-based
+detectors cannot see actuator faults by construction. The 9.1 percent recall
+is not a fault of conformal calibration. It is evidence that the signal
+family is incorrect for actuator failures.
+
+### The mechanism
+
+Log `eb456400` shows 179 seconds of sustained motor imbalance. Two motors
+pinned near maximum. Two motors near zero. The EKF tracks the vehicle
+correctly, so the innovations stay small. All 10 ratio traces remain flat.
+The controller is fighting; the estimator is satisfied. Estimator health
+and control health are two different quantities. A detector that uses one
+quantity cannot see failures in the other.
+
+Figure: `eb456400_figure.png`. Top panel: 10 ratio traces, flat at zero.
+Bottom panel: 4 motor commands, diverging to saturation and zero. Same
+time axis.
 
 ### Matched-coverage table
 
@@ -225,12 +244,23 @@ All methods calibrated at alpha = 0.05 on Group B, tested on Group C.
 | Isolation Forest | 4.91% | 5/65 (7.7%) |
 | One-Class SVM | 5.06% | 3/65 (4.6%) |
 | Autoencoder | 5.37% | 6/65 (9.2%) |
-| **PX4 threshold** | **4.60%** | **0/65 (0.0%)** |
+| PX4 threshold | 4.60% | 0/65 (0.0%) |
 
-All four methods fire at the same rate (~5%). PX4 catches zero of the top
-saturated flights.
+All methods fire at approximately the same false alarm rate. The ratio-
+based detectors catch 5 to 9 percent of the top saturated flights. PX4
+catches zero. This is not a small observation. It is the confirmation
+of the scope result.
 
-### Hand-labels (50 flights examined)
+### Matched-coverage curve
+
+The PX4 curve sits below every other detector across the full false alarm
+rate range from 0.5 to 25 percent. Not a single-threshold artifact.
+
+Figure: `matched_coverage_curve.png`.
+
+### Hand-labels
+
+Top 50 sat_frac flights in Group C, examined by hand.
 
 | Label | Count |
 |---|---|
@@ -238,115 +268,31 @@ saturated flights.
 | Borderline | 14 |
 | Not genuine | 25 |
 
-### Detector agreement
+Detector agreement:
 
 | Detector | True positive | False positive | Precision | Recall |
 |---|---|---|---|---|
 | Isolation Forest | 1/11 | 3/25 | 0.25 | 0.091 |
 | One-Class SVM | 0/11 | 1/25 | 0.00 | 0.000 |
 | Autoencoder | 1/11 | 3/25 | 0.25 | 0.091 |
-| Any detector | 1/11 | 3/25 | 0.25 | 0.091 |
 
-Recall 9.1%. Precision 25%.
+Recall is 9.1 percent. The separation is clean. The one detected flight
+had motor spread 0.13. The ten missed flights all had motor spread 0.891
+or more.
 
-### Root cause
+The probability that the one detection lands on the one low-spread flight
+by chance is 1/11 = 0.09. This is suggestive, not significant at 0.05.
+**We do not use the p-value.** We use the mechanism. `eb456400` is direct
+evidence: 179 seconds of imbalance and zero EKF response.
 
-`eb456400` has zero ratio activity across all 10 ratios despite 179 s of
-sustained motor imbalance (motors 0.03, 0.51, 0.02, 0.98). The EKF is
-satisfied; the controller is fighting. Innovation test ratios measure
-estimator confidence, not control effort. Motor imbalance is a control
-problem, not an estimation problem.
+### The reframed C4 claim
 
-### Figure
+C4 is not a weak negative result. It is a scope result. The estimator
+innovation test ratio measures estimator confidence, not control effort.
+The signal family cannot see actuator faults. Any detector built only on
+this signal family will miss motor imbalance. The bound on detection power
+is set by the input signal, not by the calibration method.
 
-`c4_handlabel_figure.png` — three panels
-
-### Scripts
-
-`matched_coverage_table.py`, `c4_handlabel.py`, `c4_finalize.py`,
-`c4_investigate.py`, `c4_figure.py`
-
----
-
-## Contamination check
-
-| Setting | Mean coverage |
-|---|---|
-| Full B (656 flights) | 0.9550 |
-  <!-- | Clean B (379 flights) | 0.9397 -->
-| **Random B (379, 200 iterations)** | **0.9553** |
-
-Contamination effect is real, not sample size. Removing tripped flights
-drops coverage by 1.5 pp. Reducing sample size drops it by 0.03 pp.
-
-### Scripts
-
-`contamination_check.py`, `contamination_control.py`
-
----
-
-## Datasheet notes
-
-### The 111 extreme ratio flights
-
-Approximately 111 flights (6.8% of corpus) carry values above 10^10 in
-`gps_hpos` and `gps_vpos`. Each has ~314 such samples. At 2 Hz that is
-~157 seconds of sustained behavior. Not brief spikes.
-
-The values are the squared normalized innovation:
-
-
-## Additional analyses
-
-### Matched-coverage curve
-
-Sweep alpha from 0.01 to 0.30. Detection power vs false alarm rate for all
-four detectors on the top-10% sat_frac flights.
-
-| Detector | FA rate (alpha=0.05) | Power (k/65) |
-|---|---|---|
-| Isolation Forest | 4.91% | 5/65 (7.7%) |
-| One-Class SVM | 5.06% | 3/65 (4.6%) |
-| Autoencoder | 5.37% | 6/65 (9.2%) |
-| PX4 threshold | 4.60% | 0/65 (0.0%) |
-
-The PX4 curve sits below every other detector across the full false alarm
-rate range from 0.5% to 25%. It is not a single-threshold artifact.
-
-Figure: `matched_coverage_curve.png`.
-
-### Alpha sensitivity of C2 and C3
-
-Reran C2 and C3 at alpha = 0.01, 0.05, 0.10, 0.20.
-
-C2 regime coverage:
-
-| alpha | hover | translation | descent |
-|---|---|---|---|
-| 0.01 | 0.9905 | 0.9842 | 0.9892 |
-| 0.05 | 0.9609 | 0.9401 | 0.9536 |
-| 0.10 | 0.9077 | 0.8921 | 0.9053 |
-| 0.20 | 0.8037 | 0.7987 | 0.8175 |
-
-C3 cross-band and weighted:
-
-| alpha | cross | weighted | gap from nominal (cross) |
-|---|---|---|---|
-| 0.01 | 0.9831 | 0.9815 | -0.007 |
-| 0.05 | 0.9228 | 0.9270 | -0.027 |
-| 0.10 | 0.8614 | 0.8714 | -0.039 |
-| 0.20 | 0.7238 | 0.7508 | -0.076 |
-
-The C2 regime gap and the C3 cross-band failure hold across all alphas.
-Not artifacts of the 95% choice.
-
-Figure: `alpha_sensitivity.png`.
-
-### Reproducibility
-
-`run_all.py` runs every analysis script in the correct order. One command
-reproduces the complete paper. Runtime: approximately 90 minutes on a
-standard laptop.
-
-`matched_coverage_curve.py`, `alpha_sensitivity.py`, `run_all.py` are the
-new scripts.
+The appropriate fix is not better calibration. It is control-side features
+such as actuator saturation fraction, motor spread, or control effort.
+That is future work.

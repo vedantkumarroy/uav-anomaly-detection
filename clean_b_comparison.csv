@@ -1,0 +1,15 @@
+claim,cal_set,regime,n_cal,coverage,detector,threshold,k,n_top,power
+C2,contaminated,hover,2429.0,0.9609323283779732,,,,,
+C2,contaminated,translation,1790.0,0.9401225994452724,,,,,
+C2,contaminated,descent,459.0,0.9535504245758298,,,,,
+C2,clean,hover,2429.0,0.9609323283779732,,,,,
+C2,clean,translation,1790.0,0.9401225994452724,,,,,
+C2,clean,descent,459.0,0.9535504245758298,,,,,
+C3,contaminated,,462.0,0.9227513227513227,,,,,
+C3,clean,,265.0,0.9079365079365079,,,,,
+C4,contaminated,,,,IsolationForest,0.5373583911609336,5.0,65.0,0.07692307692307693
+C4,clean,,,,IsolationForest,0.4802266514296858,6.0,65.0,0.09230769230769231
+C4,contaminated,,,,OneClassSVM,0.2674785809767142,3.0,65.0,0.046153846153846156
+C4,clean,,,,OneClassSVM,-4.423427677147096e-05,5.0,65.0,0.07692307692307693
+C4,contaminated,,,,Autoencoder,1.2003918496329544,6.0,65.0,0.09230769230769231
+C4,clean,,,,Autoencoder,0.7346402827401773,7.0,65.0,0.1076923076923077
