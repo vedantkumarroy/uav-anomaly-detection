@@ -18,6 +18,11 @@ evaluates conformal prediction as a calibrated alternative.
 | C3 | Null result | Point estimates under-cover cross-band, but cluster-robust intervals include nominal |
 | C4 | Scope result | EKF ratios cannot see actuator faults. Not a detection-power measurement. |
 
+Note: the C2 and C3 classifications above use the earlier segment-level
+CIs. Under flight-block bootstrap, C2 translation and descent exclude
+nominal under clean calibration, and C3 excludes nominal under both
+calibrations. See the C2 and C3 sections.
+
 ## Dataset
 
 Streamed from `logs.px4.io`. Filtered to real quadrotor flights.
@@ -141,14 +146,30 @@ Cut 1,627 flights into segments by flight regime.
 
 ### Coverage per regime
 
-| Regime | Mean coverage | 95% CI | Nominal inside? |
-|---|---|---|---|
-| Hover | 0.9609 | [0.9583, 0.9634] | No |
-| Translation | 0.9401 | [0.9365, 0.9436] | No |
-| Descent | 0.9536 | [0.9468, 0.9594] | Yes |
+Flight-block bootstrap. Unit of resampling is the flight, not the segment.
+Segments within a flight are correlated (top 10% of flights carry 35% of
+segments). The earlier segment-level bootstrap understated CI width.
 
-Hover over-covers by 1.1 pp. Translation under-covers by 1.0 pp. Marginal
-guarantee holds, conditional does not.
+**Contaminated calibration (all 650 B flights):**
+
+| Regime | Mean coverage | 95% CI | Nominal 0.95 inside? |
+|---|---|---|---|
+| Hover | 0.9570 | [0.9501, 0.9629] | No (by 0.0001) |
+| Translation | 0.9441 | [0.9322, 0.9554] | Yes |
+| Descent | 0.9583 | [0.9447, 0.9713] | Yes |
+
+**Clean calibration (374 B flights, indicator-tripping removed):**
+
+| Regime | Mean coverage | 95% CI | Nominal 0.95 inside? |
+|---|---|---|---|
+| Hover | 0.9495 | [0.9420, 0.9561] | Yes |
+| Translation | 0.9259 | [0.9124, 0.9389] | No |
+| Descent | 0.9307 | [0.9123, 0.9484] | No |
+
+Under contaminated calibration, translation and descent both include
+nominal. This matches the earlier null classification. Under clean
+calibration, translation and descent exclude nominal by 1.1 and 1.9 pp.
+The classification is calibration-dependent.
 
 ### Segments per flight
 
@@ -190,11 +211,22 @@ distribution per regime
 Calibrate on Group B from v1.12-1.13 and v1.14-1.15. Test on Group C from
 v1.16+.
 
-| Method | Mean coverage | 95% CI | Nominal inside? |
+Flight-block bootstrap. Unit of resampling is the flight.
+
+| Method | Mean coverage | 95% CI | Nominal 0.95 inside? |
 |---|---|---|---|
-| Cross-band | 0.9212 | [0.9081, 0.9325] | No |
-| In-band reference | 0.9286 | [0.9161, 0.9393] | No |
-| Weighted conformal | 0.9270 | [0.9144, 0.9379] | No |
+| Cross-band contaminated | 0.9228 | [0.9016, 0.9423] | No |
+| Cross-band clean | 0.9079 | [0.8836, 0.9307] | No |
+
+Both settings exclude nominal. The clean upper bound sits 1.9 pp below
+0.95. Cross-band under-coverage is real under both calibrations.
+
+Secondary rows (segment-level, not re-run under flight-block):
+
+| Method | Mean coverage | 95% CI |
+|---|---|---|
+| In-band reference | 0.9286 | [0.9161, 0.9393] |
+| Weighted conformal | 0.9270 | [0.9144, 0.9379] |
 
 Weighting: v1.14-1.15 x2, v1.12-1.13 x0.5.
 

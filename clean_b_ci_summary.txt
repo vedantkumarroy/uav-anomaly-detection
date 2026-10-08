@@ -1,0 +1,54 @@
+analysis_set_with_log_scores: shape=(1627, 54), unique log_id=1627
+
+==============================================================================
+Diagnostic: clean-B count
+==============================================================================
+
+B total: 650
+tripped: 276
+clean:   374
+
+indicator breakdown (count of B flights where indicator trips):
+  failsafe_frac > 0:               130
+  nav_state_forbidden_frac > 0:    88
+  filter_fault_flags_frac > 0:     52
+  landed_at_end == False:          45
+  _sat_frac > 0.05:                66
+  _sat_frac is NaN:                0
+
+==============================================================================
+C2: regime coverage, contaminated vs clean B
+==============================================================================
+
+hover
+   contaminated: 0.9570 [0.9501, 0.9629]  n_cal=2429
+   clean:        0.9495 [0.9420, 0.9561]  n_cal=1445
+   nominal 0.95 inside contaminated CI: False
+   nominal 0.95 inside clean CI:        True
+
+translation
+   contaminated: 0.9441 [0.9322, 0.9554]  n_cal=1790
+   clean:        0.9259 [0.9124, 0.9389]  n_cal=1064
+   nominal 0.95 inside contaminated CI: True
+   nominal 0.95 inside clean CI:        False
+
+descent
+   contaminated: 0.9583 [0.9447, 0.9713]  n_cal=459
+   clean:        0.9307 [0.9123, 0.9484]  n_cal=194
+   nominal 0.95 inside contaminated CI: True
+   nominal 0.95 inside clean CI:        False
+
+saved c2_clean_ci.csv
+
+==============================================================================
+C3: cross-band coverage, contaminated vs clean B
+==============================================================================
+
+cal contaminated: 462
+cal clean:        265
+test:             189
+
+cross-band contaminated: 0.9228 [0.9016, 0.9423]  nominal inside: False
+cross-band clean:        0.9079 [0.8836, 0.9307]  nominal inside: False
+
+saved c3_clean_ci.csv
