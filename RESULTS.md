@@ -18,10 +18,12 @@ evaluates conformal prediction as a calibrated alternative.
 | C3 | Null result | Point estimates under-cover cross-band, but cluster-robust intervals include nominal |
 | C4 | Scope result | EKF ratios cannot see actuator faults. Not a detection-power measurement. |
 
-Note: the C2 and C3 classifications above use the earlier segment-level
-CIs. Under flight-block bootstrap, C2 translation and descent exclude
-nominal under clean calibration, and C3 excludes nominal under both
-calibrations. See the C2 and C3 sections.
+Note: the C2 and C3 classifications above are the final ones. An earlier
+draft of this file reported a reclassification based on cleaning only the
+calibration set. That comparison was invalid. It broke exchangeability
+between calibration and test. See the Calibration contamination section.
+Cells 1 and 2 are the valid comparisons and both leave C2 and C3 as null
+or over-covering.
 
 ## Dataset
 
@@ -74,6 +76,41 @@ Conformal setup:
 |---|---|---|
 | Naive (all samples) | 344/1627 | 21.1% |
 | **Warm-up excluded** | **308/1627** | **18.9%** |
+
+### Clean-flight C1
+
+About 41 percent of the analysis flights trip at least one runtime
+indicator. Those flights are not "healthy" by the indicator definition.
+The C1 headline was recomputed on the clean subset only.
+
+| Subset | Over-flagged | Rate | 95% Wilson CI |
+|---|---|---|---|
+| All flights | 308/1627 | 18.93% | [17.10, 20.91] |
+| **Clean flights only** | **149/957** | **15.57%** | **[13.41, 18.00]** |
+| Dirty flights only | 159/670 | 23.73% | [20.67, 27.10] |
+
+Clean flights still over-flag at 15.57 percent. The implied rejection
+probability at gate 1.0 is 3.73e-6. The gap between observed and implied
+is still approximately four orders of magnitude. The claim survives the
+clean-flight correction.
+
+Per-ratio over-flag rate on clean flights (rate > 5 percent of samples):
+
+| Ratio | Mean rate | Over 5% fraction |
+|---|---|---|
+| mag_field[0] | 2.90% | 8.47% |
+| heading | 1.63% | 6.58% |
+| hagl | 0.69% | 1.88% |
+| gps_vpos | 1.03% | 1.36% |
+| baro_vpos | 0.84% | 1.25% |
+| gps_hpos[0] | 0.56% | 0.94% |
+| gps_hpos[1] | 0.31% | 0.84% |
+| gps_hvel[0] | 0.36% | 0.84% |
+| gps_hvel[1] | 0.03% | 0.31% |
+| gps_vvel | 0.08% | 0.31% |
+
+Direction matches the earlier heatmap. Magnetometer and heading are the
+worst two ratios on clean flights as well.
 
 The warm-up artifact contributes 2.2 pp. Headline is 18.9%. The 21.1% goes
 in a sensitivity note.
@@ -146,11 +183,9 @@ Cut 1,627 flights into segments by flight regime.
 
 ### Coverage per regime
 
-Flight-block bootstrap. Unit of resampling is the flight, not the segment.
-Segments within a flight are correlated (top 10% of flights carry 35% of
-segments). The earlier segment-level bootstrap understated CI width.
+Flight-block bootstrap. Unit of resampling is the flight.
 
-**Contaminated calibration (all 650 B flights):**
+**Cell 1 (dirty B, dirty C). Valid. Coverage over the corpus population.**
 
 | Regime | Mean coverage | 95% CI | Nominal 0.95 inside? |
 |---|---|---|---|
@@ -158,18 +193,23 @@ segments). The earlier segment-level bootstrap understated CI width.
 | Translation | 0.9441 | [0.9322, 0.9554] | Yes |
 | Descent | 0.9583 | [0.9447, 0.9713] | Yes |
 
-**Clean calibration (374 B flights, indicator-tripping removed):**
+**Cell 2 (clean B, clean C). Valid. Coverage over the nominal population.**
 
 | Regime | Mean coverage | 95% CI | Nominal 0.95 inside? |
 |---|---|---|---|
-| Hover | 0.9495 | [0.9420, 0.9561] | Yes |
-| Translation | 0.9259 | [0.9124, 0.9389] | No |
-| Descent | 0.9307 | [0.9123, 0.9484] | No |
+| Hover | 0.9522 | [0.9433, 0.9606] | Yes |
+| Translation | 0.9501 | [0.9373, 0.9620] | Yes |
+| Descent | 0.9696 | [0.9553, 0.9821] | No (over-covers) |
 
-Under contaminated calibration, translation and descent both include
-nominal. This matches the earlier null classification. Under clean
-calibration, translation and descent exclude nominal by 1.1 and 1.9 pp.
-The classification is calibration-dependent.
+Cell 2 is the experiment the paper is about. In the nominal population,
+conformal coverage is correct. Hover and translation sit at or just above
+nominal. Descent over-covers by 2 pp. No regime under-covers. C2 is null.
+
+Test counts: cell 2 hover 319 flights, translation 213, descent 102.
+
+**Cell 3 (clean B, dirty C) is invalid.** It breaks exchangeability
+between calibration and test. An earlier draft reported cell 3 as a
+finding. That was wrong. Cell 3 results are withdrawn.
 
 ### Segments per flight
 
@@ -208,42 +248,38 @@ distribution per regime
 
 ## C3: Cross-band distribution shift
 
-Calibrate on Group B from v1.12-1.13 and v1.14-1.15. Test on Group C from
-v1.16+.
+Calibrate on Group B from v1.12-1.13 and v1.14-1.15. Test on Group C
+from v1.16+.
 
 Flight-block bootstrap. Unit of resampling is the flight.
 
-| Method | Mean coverage | 95% CI | Nominal 0.95 inside? |
+**Cell 1 (dirty B, dirty C). Valid.**
+
+| Setting | Mean coverage | 95% CI | Nominal 0.95 inside? |
 |---|---|---|---|
-| Cross-band contaminated | 0.9228 | [0.9016, 0.9423] | No |
-| Cross-band clean | 0.9079 | [0.8836, 0.9307] | No |
+| Cross-band | 0.9228 | [0.9016, 0.9423] | No |
 
-Both settings exclude nominal. The clean upper bound sits 1.9 pp below
-0.95. Cross-band under-coverage is real under both calibrations.
+**Cell 2 (clean B, clean C). Valid.**
 
-Secondary rows (segment-level, not re-run under flight-block):
+| Setting | Mean coverage | 95% CI | Nominal 0.95 inside? |
+|---|---|---|---|
+| Cross-band | 0.9355 | [0.9093, 0.9579] | Yes |
 
-| Method | Mean coverage | 95% CI |
-|---|---|---|
-| In-band reference | 0.9286 | [0.9161, 0.9393] |
-| Weighted conformal | 0.9270 | [0.9144, 0.9379] |
+Calibration counts: cell 1 B=462, C=189. Cell 2 B=265, C=107.
 
-Weighting: v1.14-1.15 x2, v1.12-1.13 x0.5.
+Cell 1 excludes nominal by 2.7 pp. Cell 2 under-covers by 1.45 pp but the
+95 percent CI includes nominal. With 107 test flights the test set does
+not have the power to reject. C3 is null.
 
-**Key finding:** the guarantee fails cross-band. But in-band also fails.
-The failure is not solely cross-band shift. v1.16+ under-covers even with
-same-band calibration.
+The point estimate direction is consistent with distribution shift. The
+sample size is not sufficient to establish it. More flights in v1.16+
+would be required. This is reported as a limit, not a finding.
 
-Segment-level weighted conformal with cluster bootstrap in
-`c3_weighted_segments.py`.
+**Cell 3 (clean B, dirty C) is invalid.** Dropped.
 
-### Figure
+Figure: `c3_shift_figure.png`, `c3_weighted_segments_figure.png`
 
-`c3_shift_figure.png`, `c3_weighted_segments_figure.png`
-
-### Scripts
-
-`c3_shift.py`, `c3_weighted_segments.py`
+Scripts: `c3_shift.py`, `c3_weighted_segments.py`, `cell2_clean.py`
 
 ---
 
@@ -333,44 +369,56 @@ That is future work.
 
 ## Calibration contamination
 
-Every headline number uses contaminated calibration. All 650 Group B flights
-were used. No filter for indicator-tripping flights.
+Three calibration / test combinations are possible.
 
-| Setting | Mean coverage | Comment |
-|---|---|---|
-| Contaminated (650 flights) | 0.9550 | Used in all headline results |
-| Clean (374 flights) | 0.9397 | Reported for transparency |
-| Random control (374, 200 iterations) | 0.9553 | Proves the drop is contamination, not sample size |
-
-Contaminated flights have high scores. They sit in the upper tail. Keeping
-them pushes the 95th percentile up. A higher threshold flags fewer test
-flights. Coverage then looks better than it is.
-
-**Contamination makes the detector less sensitive than reported.** This is
-a small copy of the paper's thesis inside our own pipeline.
-
-Both versions are reported in the paper.
-
-### Per-claim comparison: contaminated vs clean calibration
-
-Every claim below is reported with contaminated B (all 650 flights) and with
-clean B (374 flights, indicator-tripping removed).
-
-| Claim | Contaminated | Clean | Note |
+| Cell | Calibration B | Test C | Valid? |
 |---|---|---|---|
-| C1 false alarm rate | 18.9% | 18.9% | C1 does not use B. Identical. |
-| C2 hover coverage | 0.9609 | 0.9533 | Both above nominal |
-| C2 translation coverage | 0.9401 | 0.9187 | Clean under-covers by 3.1 pp |
-| C2 descent coverage | 0.9536 | 0.9215 | Clean under-covers by 2.9 pp |
-| C3 cross-band coverage | 0.9228 | 0.9079 | Clean under-covers by 4.2 pp |
-| C4 IsoForest power | 5/65 (7.7%) | 7/65 (10.8%) | Clean raises sensitivity |
-| C4 SVM power | 4/65 (6.2%) | 6/65 (9.2%) | Clean raises sensitivity |
-| C4 AE power | 6/65 (9.2%) | 7/65 (10.8%) | Clean raises sensitivity |
+| Cell 1 | dirty (650) | dirty (652) | Yes |
+| Cell 2 | clean (374) | clean (388) | Yes. Paper experiment. |
+| Cell 3 | clean (374) | dirty (652) | No. Breaks exchangeability. |
 
-Direction is consistent across all claims. Contaminated B raises the
-conformal threshold. A higher threshold means fewer test flights flagged.
-Coverage goes up, sensitivity goes down. Clean B reverses both. This is
-the contamination thesis on every claim at once.
+**Cell 1** measures coverage over the full corpus population. This is the
+headline that uses all of Group B and all of Group C.
 
-Clean calibration still leaves C4 detection power at 10.8 percent or below.
-The scope result does not depend on the contamination choice.
+**Cell 2** measures coverage over the nominal population. The claim is
+that 95 percent of flights showing no failure indicator fall below the
+threshold. This requires a clean calibration set and a clean test set.
+Cell 2 is the experiment the paper is about.
+
+**Cell 3** was reported in an earlier draft and is withdrawn. Cleaning
+only the calibration set removes the high-score flights from the upper
+tail. The 95th percentile drops. The threshold drops. Group C still
+contains its contaminated flights. More of them exceed the lowered
+threshold. Coverage falls below nominal. This is mechanical, not a
+conformal failure.
+
+### Cell 2 results
+
+| Claim | Cell 1 | Cell 2 | 0.95 inside cell 2? |
+|---|---|---|---|
+| C1 (clean flight only) | 18.93% over-flag | 15.57% over-flag | n/a. C1 is a rate. |
+| C2 hover | 0.9570 | 0.9522 | Yes |
+| C2 translation | 0.9441 | 0.9501 | Yes |
+| C2 descent | 0.9583 | 0.9696 | No (over-covers) |
+| C3 cross-band | 0.9228 | 0.9355 | Yes |
+
+Conformal operates correctly on nominal data. This is the paper result.
+The C2 regimes cover or over-cover. The C3 cross-band point estimate
+under-covers by 1.45 pp but the CI includes nominal.
+
+### Interpretation
+
+The inflated C2 and C3 numbers in the earlier draft came from cell 3,
+which is not a valid comparison. Conformal prediction does not fail on
+nominal data.
+
+The C1 clean-flight number (15.57 percent) is the correct PX4 false alarm
+rate on flights that show no failure indicator. That claim stands and is
+still four orders of magnitude above the implied rate.
+
+### Test counts
+
+Cell 2: C2 hover 319 flights, translation 213, descent 102. C3 cross-band
+107 flights. The C3 test count is the limiting factor. A larger corpus
+would be required to reject nominal if the point estimate is stable.
+

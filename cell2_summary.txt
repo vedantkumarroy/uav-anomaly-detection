@@ -1,0 +1,47 @@
+analysis rows: 1627
+
+tripped totals across A+B+C:
+  total:  1627
+  tripped: 670
+  clean:   957
+  A: total=325  tripped=130  clean=195
+  B: total=650  tripped=276  clean=374
+  C: total=652  tripped=264  clean=388
+
+==============================================================================
+C2: regime coverage, cell 1 (dirty/dirty) vs cell 2 (clean/clean)
+==============================================================================
+
+hover
+  cell 1 (dirty B, dirty C): 0.9570 [0.9501, 0.9629]  n_cal=2429  n_test=2290  test_flights=513  ratios=10
+  cell 2 (clean B, clean C): 0.9522 [0.9433, 0.9606]  n_cal=1445  n_test=1404  test_flights=319  ratios=10
+  0.95 inside cell 1 CI: False
+  0.95 inside cell 2 CI: True
+
+translation
+  cell 1 (dirty B, dirty C): 0.9441 [0.9322, 0.9554]  n_cal=1790  n_test=1743  test_flights=364  ratios=10
+  cell 2 (clean B, clean C): 0.9501 [0.9373, 0.9620]  n_cal=1064  n_test=947  test_flights=213  ratios=10
+  0.95 inside cell 1 CI: True
+  0.95 inside cell 2 CI: True
+
+descent
+  cell 1 (dirty B, dirty C): 0.9583 [0.9447, 0.9713]  n_cal=459  n_test=434  test_flights=207  ratios=10
+  cell 2 (clean B, clean C): 0.9696 [0.9553, 0.9821]  n_cal=194  n_test=201  test_flights=102  ratios=10
+  0.95 inside cell 1 CI: True
+  0.95 inside cell 2 CI: False
+
+saved c2_cell2.csv
+
+==============================================================================
+C3: cross-band coverage, cell 1 vs cell 2
+==============================================================================
+
+B cal all:    462
+B cal clean:  265
+C test all:   189
+C test clean: 107
+
+cell 1 (dirty B, dirty C): 0.9228 [0.9016, 0.9423]  test_flights=189  ratios=10  nominal inside: False
+cell 2 (clean B, clean C): 0.9355 [0.9093, 0.9579]  test_flights=107  ratios=10  nominal inside: True
+
+saved c3_cell2.csv

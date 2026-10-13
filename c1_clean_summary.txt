@@ -1,0 +1,30 @@
+c1_warmup_excluded rows: 1627
+merged rows: 1627
+merged missing tripped: 0
+
+counts:
+  total:  1627
+  clean:  957
+  dirty:  670
+
+C1 headline (warm-up excluded, 30 s):
+  all flights:    308/1627 = 0.1893
+  clean only:     149/957 = 0.1557
+  dirty only:     159/670 = 0.2373
+
+95% Wilson CI:
+  all flights:    [0.1710, 0.2091]
+  clean only:     [0.1341, 0.1800]
+  dirty only:     [0.2067, 0.2710]
+
+per-ratio over-flag rate (rate > 5% of samples), clean flights only:
+         baro_vpos  mean_rate=0.0084  over_5pct_frac=0.0125
+       gps_hpos[0]  mean_rate=0.0056  over_5pct_frac=0.0094
+       gps_hpos[1]  mean_rate=0.0031  over_5pct_frac=0.0084
+       gps_hvel[0]  mean_rate=0.0036  over_5pct_frac=0.0084
+       gps_hvel[1]  mean_rate=0.0003  over_5pct_frac=0.0031
+          gps_vpos  mean_rate=0.0103  over_5pct_frac=0.0136
+          gps_vvel  mean_rate=0.0008  over_5pct_frac=0.0031
+              hagl  mean_rate=0.0069  over_5pct_frac=0.0188
+           heading  mean_rate=0.0163  over_5pct_frac=0.0658
+      mag_field[0]  mean_rate=0.0290  over_5pct_frac=0.0847
