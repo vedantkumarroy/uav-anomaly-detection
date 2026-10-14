@@ -1,0 +1,24 @@
+clean flights: 957
+
+keeping 8 ratios: ['baro_vpos', 'gps_hpos[0]', 'gps_hpos[1]', 'gps_hvel[0]', 'gps_hvel[1]', 'gps_vpos', 'gps_vvel', 'hagl']
+
+C1 union over-flag rate, clean flights:
+  all 10 ratios:                    149/957 = 0.1557  [0.1341, 0.1800]
+  mag_field[0] and heading removed: 53/957 = 0.0554  [0.0426, 0.0717]
+
+individual ratio over-flag rate on clean flights:
+         baro_vpos    12/957  = 0.0125
+       gps_hpos[0]     9/957  = 0.0094
+       gps_hpos[1]     8/957  = 0.0084
+       gps_hvel[0]     8/957  = 0.0084
+       gps_hvel[1]     3/957  = 0.0031
+          gps_vpos    13/957  = 0.0136
+          gps_vvel     3/957  = 0.0031
+           heading    63/957  = 0.0658
+      mag_field[0]    75/957  = 0.0784
+              hagl    18/957  = 0.0188
+
+clean vs dirty CI overlap:
+  clean:  149/957 = 0.1557  [0.1341, 0.1800]
+  dirty:  159/670 = 0.2373  [0.2067, 0.2710]
+  intervals overlap: False
