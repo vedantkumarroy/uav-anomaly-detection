@@ -8,3 +8,16 @@ pilot2/
 *.parquet
 .DS_Store
 pilot_2270/
+
+# Data directories
+pilot_500_v2/
+pilot_500_v3/
+pilot_extra/
+
+# Backups
+*.bak
+*.bak[0-9]
+*.bak[0-9][0-9]
+*.pre_cell2
+RESULTS.md.bak*
+RESULTS.md.pre_*
