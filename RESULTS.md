@@ -421,6 +421,40 @@ would be required to reject nominal if the point estimate is stable.
 
 ---
 
+## Summary across cells
+
+Every claim, both cells, all numbers. The pattern is that two results are
+significant against nominal, and each one sits in exactly one cell.
+
+| Claim | Population | Cell | n | Point | 95% CI | Nominal 0.95 |
+|---|---|---|---|---|---|---|
+| C1 all flights | corpus | n/a | 1627 | 18.93% | [17.10, 20.91] | rate |
+| C1 clean flights | nominal | n/a | 957 | 15.57% | [13.41, 18.00] | rate |
+| C1 clean, mag+heading removed | nominal | n/a | 957 | 5.54% | [4.26, 7.17] | rate |
+| C2 hover | corpus | 1 | 513 | 0.9570 | [0.9501, 0.9629] | outside by 0.0001 |
+| C2 translation | corpus | 1 | 364 | 0.9441 | [0.9322, 0.9554] | inside |
+| C2 descent | corpus | 1 | 207 | 0.9583 | [0.9447, 0.9713] | inside |
+| C2 hover | nominal | 2 | 319 | 0.9522 | [0.9433, 0.9606] | inside |
+| C2 translation | nominal | 2 | 213 | 0.9501 | [0.9373, 0.9620] | inside |
+| C2 descent | nominal | 2 | 102 | 0.9696 | [0.9553, 0.9821] | outside by 0.53 pts |
+| C3 cross-band | corpus | 1 | 189 | 0.9228 | [0.9016, 0.9423] | outside by 0.77 pts |
+| C3 cross-band | nominal | 2 | 107 | 0.9355 | [0.9093, 0.9579] | inside |
+| C4 top-10% detection | both | n/a | 65 | 0-7/65 | -- | n/a |
+
+Two results are significant. C3 cross-band under-covers in cell 1 only.
+C2 descent over-covers in cell 2 only. Both differences have clear causes.
+
+C3. Cell 1 has 188 test flights and cell 2 has 107, 57 percent of the count.
+The interval in cell 2 is approximately 1.33 times wider. The point estimate
+moves in the same direction in both cells (0.9228 and 0.9355). This is a loss
+of power, not a different result.
+
+C2 descent. Half-widths are effectively identical (0.0133 cell 1, 0.0134
+cell 2). The point estimate moves up by 1.13 points (0.9583 to 0.9696).
+Cleaning removed the contaminated descent flights. Those have high scores
+and pull coverage down. Removing them raises coverage. Coverage inflation,
+not a different regime behaviour.
+
 ## Confidence interval re-examination
 
 Sir's correction on how to read a confidence interval. The rule is: does
