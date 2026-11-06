@@ -32,9 +32,9 @@ ax.set_ylabel("Cross-band coverage")
 ax.set_ylim(0.86, 1.00)
 ax.set_title("C3: cross-band coverage, flight-block bootstrap CIs")
 ax.grid(axis="y", alpha=0.3)
-for xi, (p, n) in enumerate(zip(points, ns)):
-    ax.text(xi, p - 0.005, f"{p:.4f}\nn={n}", ha="center", va="top", fontsize=9)
-ax.legend(loc="lower right")
+for xi, (p, n, h) in enumerate(zip(points, ns, hi)):
+    ax.text(xi, h + 0.005, f"{p:.4f}\nn={n}", ha="center", va="bottom", fontsize=10, fontweight='bold')
+ax.legend(loc="upper left", bbox_to_anchor=(1.05, 1), borderaxespad=0.)
 plt.tight_layout()
 plt.savefig("c3_cells_figure.png", dpi=150, bbox_inches="tight")
 print("saved c3_cells_figure.png")

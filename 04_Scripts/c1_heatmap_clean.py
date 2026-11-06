@@ -120,9 +120,9 @@ def main():
         ax.set_yticklabels(RATIOS if band == BANDS[0] else [""] * len(RATIOS))
         ax.set_xlabel("PX4 threshold")
         ax.set_title(f"{band}  (n={len(sub)})")
-    fig.colorbar(im, ax=axes, label="Fraction of clean flights over-flagged")
-    fig.suptitle("C1: fraction of clean flights over-flagged, 30 s warm-up excluded")
-    plt.tight_layout()
+    cbar = fig.colorbar(im, ax=axes.ravel().tolist(), pad=0.02, fraction=0.046)
+    cbar.set_label("Fraction of clean flights over-flagged", labelpad=10)
+    fig.suptitle("C1: fraction of clean flights over-flagged, 30 s warm-up excluded", y=1.05)
     plt.savefig("c1_heatmap_clean.png", dpi=150, bbox_inches="tight")
     print("saved c1_heatmap_clean.png")
 
