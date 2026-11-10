@@ -1,3 +1,14 @@
+> **Correction notice.** The C1 interpretation in this document was superseded
+> after it was written. It compares every ratio against a single implied rate of
+> 3.73e-6, derived assuming a two-degree-of-freedom chi-square and a 5-sigma gate
+> for all ten ratios. Both assumptions are wrong: the published ratios are
+> per-axis scalars, so the null has one degree of freedom, and the gate is 3.0
+> for the magnetometer and 2.6 for heading, not 5.0. Measured against their own
+> gates, those two ratios are the best behaved of the ten, not the worst. The
+> corrected per-ratio result is in `03_Data_CSVs/c1_summary_clean.csv`, generated
+> by `04_Scripts/c1_summary_clean.py`. The C1 passages below have been annotated;
+> C2, C3 and C4 are unaffected.
+
 # Calibrated Anomaly Detection on Open UAV Flight Logs
 
 Consolidated results. Updated October 8, 2026.
@@ -13,7 +24,7 @@ evaluates conformal prediction as a calibrated alternative.
 
 | Claim | Classification | Result |
 |---|---|---|
-| C1 | Strong quantitative claim | Clean flights over-flag at 15.57%. Driven by magnetometer and heading. Without those two ratios the rate is 5.54%. Implied rate is 3.73e-6. Gap is four orders of magnitude. |
+| C1 | Strong quantitative claim | Clean flights over-flag at 15.57%. Without the magnetometer and heading ratios the rate is 5.54%. Measured per ratio against its own gate, the eight 5-sigma ratios exceed their null by 2.8 to 4.3 orders of magnitude; magnetometer and heading, gated looser by design, fire at 10.7x and 1.75x. See `c1_summary_clean.csv`. |
 | C2 | Regime-dependent | Descent over-covers by 2.0 points, significant. Hover and translation sit at nominal. |
 | C3 | Split result | Significant over the corpus population (cell 1, nominal outside CI). Underpowered over the nominal population (cell 2, nominal inside CI, 107 test flights). |
 | C4 | Scope result | EKF ratios cannot see actuator faults. Not a detection-power measurement. |
@@ -85,10 +96,11 @@ The C1 headline was recomputed on the clean subset only.
 | **Clean flights only** | **149/957** | **15.57%** | **[13.41, 18.00]** |
 | Dirty flights only | 159/670 | 23.73% | [20.67, 27.10] |
 
-Clean flights still over-flag at 15.57 percent. The implied rejection
-probability at gate 1.0 is 3.73e-6. The gap between observed and implied
-is still approximately four orders of magnitude. The claim survives the
-clean-flight correction.
+Clean flights still over-flag at 15.57 percent, and the claim survives the
+clean-flight correction. The 3.73e-6 implied rate quoted here is superseded:
+it assumes two degrees of freedom and a 5-sigma gate for every ratio. The
+corrected comparison is per ratio against its own gate, in
+`c1_summary_clean.csv`.
 
 Per-ratio over-flag rate on clean flights (rate > 5 percent of samples):
 
@@ -105,8 +117,10 @@ Per-ratio over-flag rate on clean flights (rate > 5 percent of samples):
 | gps_hvel[1] | 0.03% | 0.31% |
 | gps_vvel | 0.08% | 0.31% |
 
-Direction matches the earlier heatmap. Magnetometer and heading are the
-worst two ratios on clean flights as well.
+Direction matches the earlier heatmap. Magnetometer and heading produce the
+most raw flags on clean flights. Note that this is a count of flags, not a
+measure of miscalibration: both are gated looser than the other eight by
+design, and against their own gates they are the closest to specification.
 
 The warm-up artifact contributes 2.2 pp. Headline is 18.9%. The 21.1% goes
 in a sensitivity note.
@@ -119,6 +133,14 @@ in a sensitivity note.
 | 2.0 | 100 | 1.93e-22 | 17.0% |
 | 5.0 | 625 | ~ | 11.8% |
 | 10.0 | 2500 | 5.17e-55 | 8.2% |
+
+**Superseded:** the tail probabilities in this table assume two degrees of
+freedom. The published ratios are per-axis scalars, so the correct null has one
+degree of freedom: at threshold 1.0 it is 5.73e-7, not 3.73e-6. The chi-square
+column is also wrong in the last row; the correction below gives 250, not 2500.
+Only the flights-over-flagged column is unaffected. The paper reports the
+per-sample rate against each ratio's own gate instead; see
+`03_Data_CSVs/c1_summary_clean.csv`.
 
 **Correction:** earlier I wrote threshold 10.0 implied rate as exp(-50) =
 1.9e-22. This was wrong. The ratio is already divided by gate². Ratio = 10
@@ -409,8 +431,9 @@ which is not a valid comparison. Conformal prediction does not fail on
 nominal data.
 
 The C1 clean-flight number (15.57 percent) is the correct PX4 false alarm
-rate on flights that show no failure indicator. That claim stands and is
-still four orders of magnitude above the implied rate.
+rate on flights that show no failure indicator. That claim stands. The
+orders-of-magnitude comparison is superseded; see the correction notice at
+the top of this file.
 
 ### Test counts
 
@@ -523,15 +546,17 @@ Union over-flag rate on clean flights:
 | All 10 ratios | 149/957 | 15.57% | [13.41, 18.00] |
 | Magnetometer and heading removed | 53/957 | 5.54% | [4.26, 7.17] |
 
-Removing the top two ratios drops the union rate to 5.54 percent. The
-remaining eight ratios still over-flag. At gate 1.0 the implied rejection
-probability is 3.73e-6. The gap is still approximately four orders of
-magnitude even without mag and heading.
+Removing the magnetometer and heading ratios drops the union rate to 5.54
+percent. The remaining eight ratios still over-flag, and they are the ones
+that are genuinely miscalibrated: against their own 5-sigma null they run
+2.8 to 4.3 orders of magnitude high. The 3.73e-6 figure quoted here is
+superseded.
 
-The finding: the magnetometer and heading gates carry most of the C1
-effect. They should be recalibrated first. The remaining eight ratios
-over-flag at a much lower but still non-nominal rate, so gate calibration
-is a problem across the board.
+The finding, as corrected: the magnetometer and heading gates produce most
+of the raw flags, but only because PX4 gates them loose on purpose. Against
+their own gates they fire at 10.7x and 1.75x their null. The eight ratios
+gated at 5 sigma run 2.8 to 4.3 orders of magnitude above theirs, so those
+are the gates that need recalibrating first.
 
 ## Clean versus dirty: independent validation of the indicator rule
 

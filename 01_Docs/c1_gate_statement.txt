@@ -1,3 +1,12 @@
+SUPERSEDED. The derivation below assumes a two-degree-of-freedom chi-square
+and a 5-sigma gate for all ten ratios. Both are wrong. The published ratios
+are per-axis scalars (one degree of freedom), and the gate is 3.0 for the
+magnetometer and 2.6 for heading. The threshold-10 figures are also not used:
+at that threshold the Gaussian tail runs past 1e-50, where the noise model is
+not physically meaningful. For the corrected per-ratio comparison see
+03_Data_CSVs/c1_summary_clean.csv and 04_Scripts/c1_summary_clean.py.
+Kept for provenance only.
+
 C1 STATEMENT WITH IMPLIED RATE
 
 PX4 uses a 5-sigma gate on the horizontal position innovation.

@@ -67,7 +67,7 @@ What is released instead is the **log-ID manifest** plus the code.
 | File | Rows | Contents |
 |---|---|---|
 | `combined_index.csv` | 2,770 | **The manifest.** Every log streamed, with `log_id`, firmware version, decoded band, parse status, screening-gate outcomes and the five runtime indicators. This is the file to start from. |
-| `combined_analysis_set.csv` | 1,627 | The analysis set: the subset of the manifest that cleared every screening gate. |
+| `combined_analysis_set.csv` | 1,627 | The analysis set: the subset of the manifest that cleared every screening gate. Its `group` column is an earlier A/B/C assignment and is **not** the one the analysis used; take group membership from `analysis_set_with_satfrac.csv` instead. |
 
 Any `log_id` resolves to `https://logs.px4.io/plot_app?log=<log_id>` for
 inspection in the browser, or `https://logs.px4.io/download?log=<log_id>` for
@@ -103,7 +103,7 @@ Use these. Everything else is either a sensitivity check or superseded.
 
 | File | Rows | Contents |
 |---|---|---|
-| `analysis_set_with_satfrac.csv` | 1,627 | **Canonical per-flight feature table.** Superset of every other `analysis_set_with_*` file: metadata, band, group assignment, the five runtime indicators, the ten log-transformed ratio scores, and actuator saturation fraction. |
+| `analysis_set_with_satfrac.csv` | 1,627 | **Canonical per-flight feature table, and the authoritative A/B/C group assignment** (51/102/103, 180/360/360, 94/188/189). Superset of every other `analysis_set_with_*` file: metadata, band, group assignment, the five runtime indicators, the ten log-transformed ratio scores, and actuator saturation fraction. |
 | `regime_segments.csv` | 11,330 | Hover / translation / descent segments with start, end, parent `log_id` and per-segment ratio scores. |
 | `version_bands_table.csv` | 1,634 | Firmware version decoded from the packed 32-bit field, with band assignment. |
 | `classify_outputs_quads.csv` | 426 | Quadrotor confirmation from actual actuator-output count, rather than from the `SYS_AUTOSTART` metadata alone. |
