@@ -1,5 +1,7 @@
 # Calibrated Anomaly Detection on Open UAV Flight Logs
 
+[![DOI](https://zenodo.org/badge/1366401146.svg)](https://doi.org/10.5281/zenodo.24110697)
+
 Vedant Kumar Roy (IIT Madras)
 Supervisor: Prof. Tavish Pattanayak, BITS Pilani Dubai Campus
 Period: September to December 2026
