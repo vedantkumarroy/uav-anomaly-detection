@@ -4,9 +4,12 @@ Reproduce all paper results from committed data.
 Usage:
     python run_all.py
 
-Runs each analysis script in sequence. Produces all figures and CSVs
-in the working directory. Requires the Parquet logs (gitignored) to be
-present in pilot_2270/logs and pilot_extra/logs.
+Runs each analysis script in sequence. Produces every table and figure the
+paper uses, plus the sensitivity checks, in the working directory.
+
+Requires the Parquet corpus, which is not committed. Rebuild it first with
+fetch_by_id.py, which downloads the exact log IDs in the manifest. The corpus
+is expected at pilot_2270/logs and pilot_extra/logs.
 """
 
 import os
@@ -16,9 +19,14 @@ import subprocess
 
 # Order matters: some scripts consume outputs of earlier scripts
 STEPS = [
+    # Corpus composition figures
+    ("Corpus: screening funnel figure", "funnel_figure.py"),
+    ("Corpus: band and group split figure", "split_figure.py"),
+
     # C1
     ("C1: false alarm rate (all samples)", "c1_false_alarm.py"),
     ("C1: warm-up excluded", "c1_false_alarm_v2.py"),
+    ("C1: per-ratio summary on clean flights", "c1_summary_clean.py"),
     ("C1: per-band breakdown", "c1_per_band.py"),
     ("C1: threshold sensitivity", "c1_threshold_sensitivity.py"),
     ("C1: extreme-value sensitivity", "c1_exclude_extremes.py"),
@@ -35,6 +43,14 @@ STEPS = [
     ("C3: segment-level with block bootstrap", "c3_weighted_segments.py"),
     ("C3: CI computation", "c3_ci.py"),
 
+    # Cell 1 vs cell 2. Produces the primary C2 and C3 results in the paper,
+    # so it must run before the cell figures below.
+    ("Cells: cell 1 and cell 2 for C2 and C3", "cell2_clean.py"),
+    ("Cells: clean-B bootstrap CIs", "clean_b_ci.py"),
+    ("Cells: clean-B claim comparison", "clean_b_comparison.py"),
+    ("C2: cell figure (paper)", "c2_figure_cells.py"),
+    ("C3: cell figure (paper)", "c3_figure_cells.py"),
+
     # C4
     ("C4: matched-coverage table", "matched_coverage_table.py"),
     ("C4: matched-coverage curve", "matched_coverage_curve.py"),
@@ -42,6 +58,8 @@ STEPS = [
     ("C4: hand-label finalization", "c4_finalize.py"),
     ("C4: root-cause investigation", "c4_investigate.py"),
     ("C4: hand-label figure", "c4_figure.py"),
+    ("C4: cell figure and table (paper)", "c4_cells_figure.py"),
+    ("C4: eb456400 case study figure (paper)", "eb456400_figure.py"),
 
     # Contamination
     ("Contamination: check", "contamination_check.py"),
@@ -54,6 +72,7 @@ STEPS = [
     ("Final summary tables", "final_summary.py"),
     ("Co-occurrence structure", "cooccurrence.py"),
 ]
+
 
 
 def main():

@@ -1,0 +1,41 @@
+{
+  "title": "Calibrated Anomaly Detection on Open UAV Flight Logs: screened corpus manifest, analysis pipeline and derived results",
+  "upload_type": "software",
+  "description": "<p>Code, log-ID manifest and derived result tables for a study measuring the false alarm rate of the PX4 autopilot's EKF innovation gates on 1,627 real quadrotor flights, and evaluating split conformal prediction as a calibrated alternative.</p><p>Contents: the manifest of 2,770 streamed PX4 flight logs with screening outcomes; the 1,627-flight analysis set across three firmware bands; 83 derived result tables; 29 figures; and the full analysis pipeline including a fetch-by-ID script that rebuilds the Parquet corpus from the manifest.</p><p>The raw flight logs and the 26.9 GB Parquet corpus are not redistributed here. The logs belong to the PX4 community and remain available from the public Flight Review repository at logs.px4.io; <code>04_Scripts/fetch_by_id.py</code> downloads precisely the log IDs in the manifest and rebuilds the corpus.</p><p>Code is MIT licensed. Derived data tables are released under CC-BY-4.0.</p>",
+  "license": "mit",
+  "access_right": "open",
+  "creators": [
+    {
+      "name": "Roy, Vedant Kumar",
+      "affiliation": "Indian Institute of Technology Madras"
+    },
+    {
+      "name": "Pattanayak, Tavish",
+      "affiliation": "BITS Pilani Dubai Campus"
+    }
+  ],
+  "keywords": [
+    "conformal prediction",
+    "calibration",
+    "unmanned aerial vehicles",
+    "PX4",
+    "Extended Kalman Filter",
+    "innovation gating",
+    "false alarm rate",
+    "anomaly detection",
+    "prognostics and health management",
+    "distribution shift"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "https://github.com/vedantkumarroy/uav-anomaly-detection",
+      "relation": "isSupplementTo",
+      "scheme": "url"
+    },
+    {
+      "identifier": "https://logs.px4.io",
+      "relation": "isDerivedFrom",
+      "scheme": "url"
+    }
+  ]
+}

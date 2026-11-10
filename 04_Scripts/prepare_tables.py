@@ -1,3 +1,15 @@
+"""SUPERSEDED. Pilot-era table printer, not part of the published pipeline.
+
+This script reads pilot_2270_index.csv (2,270 logs), analysis_set.csv (the
+1,566-flight partial set) and track_b_coverage.csv (an abandoned scoring
+track), and hardcodes a Gate 1 count of 1901. Every one of those figures
+disagrees with the paper, which reports 2,770 streamed, 2,168 Gate 1
+survivors and a 1,627-flight analysis set.
+
+It is not in run_all.py. Kept for provenance only. For the published
+tables see final_summary.py and 01_Docs/RESULTS.md.
+"""
+
 import pandas as pd
 import numpy as np
 

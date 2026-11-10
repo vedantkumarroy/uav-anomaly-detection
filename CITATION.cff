@@ -1,0 +1,29 @@
+cff-version: 1.2.0
+message: "If you use this corpus or pipeline, please cite it as below."
+title: "Calibrated Anomaly Detection on Open UAV Flight Logs: screened corpus manifest, analysis pipeline and derived results"
+abstract: >-
+  Code, log-ID manifest and derived result tables for a study measuring the
+  false alarm rate of the PX4 autopilot's EKF innovation gates on 1,627 real
+  quadrotor flights, and evaluating split conformal prediction as a calibrated
+  alternative. The raw logs and the Parquet corpus are not redistributed; the
+  included fetch-by-ID script rebuilds the corpus from the manifest.
+type: software
+license: MIT
+repository-code: "https://github.com/vedantkumarroy/uav-anomaly-detection"
+authors:
+  - family-names: Roy
+    given-names: Vedant Kumar
+    affiliation: "Indian Institute of Technology Madras"
+  - family-names: Pattanayak
+    given-names: Tavish
+    affiliation: "BITS Pilani Dubai Campus"
+    email: tpattanayak@dubai.bits-pilani.ac.in
+keywords:
+  - conformal prediction
+  - calibration
+  - unmanned aerial vehicles
+  - PX4
+  - Extended Kalman Filter
+  - innovation gating
+  - false alarm rate
+  - anomaly detection
